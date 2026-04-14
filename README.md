@@ -1,20 +1,98 @@
-#Log analyzer
-This project analyzes login logs and detects suspicious IP addresses based on repeated failed login attempts.
+# Security Log Analyzer
 
-## Features
-- Reads login data from a file
-- Counts failed login attempts per IP
-- Flags suspicious IPs using a threshold
+A Python and SQLite-based security log analyzer that processes structured login logs, validates data, stores records in a database, and detects suspicious authentication attacks.
 
-## Example Input
-192.168.1.1 FAIL
-192.168.1.2 SUCCESS
-192.168.1.1 FAIL
-192.168.1.3 SUCCESS
-192.168.1.1 FAIL
+--------------------------------------------------
 
-## Example output
-192.168.1.1 is suspicious with 3 failed attempts
+FEATURES
 
-## How to run
-python3 read_logs.py
+- Parses structured log data (IP, status, timestamp, port, service)
+- Validates and skips invalid or malformed log entries
+- Stores logs in SQLite database
+- Uses SQL to analyze failed login attempts
+- Detects:
+  - SSH brute force attacks (port 22)
+  - RDP brute force attacks (port 3389)
+- Displays:
+  - Attack type
+  - Entry point (service)
+  - Port
+  - Attack start time
+
+--------------------------------------------------
+
+LOG FORMAT
+
+Each log entry follows:
+
+IP STATUS TIMESTAMP PORT SERVICE
+
+Example:
+
+192.168.1.1 FAIL 2026-04-13T10:01:00 22 SSH
+192.168.1.3 FAIL 2026-04-13T10:06:00 3389 RDP
+
+--------------------------------------------------
+
+EXAMPLE OUTPUT
+
+---- Security Alert Report ----
+
+IP: 192.168.1.1
+Attack Type: SSH Brute Force Attack
+Entry Point: SSH Authentication Service
+Port: 22
+Start Time: 2026-04-13T10:01:00
+Details: Multiple failed SSH login attempts detected
+
+IP: 192.168.1.3
+Attack Type: RDP Brute Force Attack
+Entry Point: RDP Authentication Service
+Port: 3389
+Start Time: 2026-04-13T10:06:00
+Details: Multiple failed RDP login attempts detected
+
+--------------------------------------------------
+
+HOW TO RUN
+
+1. Make sure Python 3 is installed
+2. Run:
+
+python3 security_log_analyzer.py
+
+--------------------------------------------------
+
+PROJECT STRUCTURE
+
+security_log_analyzer.py   -> Main script  
+logs.txt                   -> Input log file  
+README.md                  -> Documentation  
+.gitignore                 -> Ignored files  
+
+--------------------------------------------------
+
+SKILLS DEMONSTRATED
+
+- Python (file handling, logic, validation)
+- SQLite (database operations)
+- SQL (GROUP BY, aggregation, filtering)
+- Log parsing and structured data processing
+- Basic cybersecurity concepts (authentication attacks, brute force detection)
+
+--------------------------------------------------
+
+NOTES
+
+- logs.db is generated automatically and ignored via .gitignore
+- Project focuses on authentication-based attack detection
+- Simulates a simplified real-world log analysis system
+
+--------------------------------------------------
+
+FUTURE IMPROVEMENTS
+
+- Credential stuffing detection (FAIL → SUCCESS pattern)
+- Time-based attack detection
+- Support for additional services and ports
+- Multi-source log correlation
