@@ -52,8 +52,8 @@ with open("logs.txt", "r") as file:
 #save inserted row
 conn.commit()
 
-print("---- POSSIBLE CREDENTIAL STUFFING REPORT ----")
-print()
+credential_stuffing_targets = set()
+stuffing_results = []
 
 #Query failed attempts per IP
 cursor.execute("""
@@ -78,6 +78,7 @@ for row in rows:
     start_time = row[5]
 
     if fail_count >= fail_threshold and success_count >= 1:
+        credential_stuffing_targets.add((ip, port, service))
         
         #Attack classification
         if str(port) == "22" or service.upper() == "SSH":
@@ -96,6 +97,50 @@ for row in rows:
             details = "Multiple failed login attempts followed by a successful authentication from the same source IP"
             
         
+        stuffing_results.append((ip, attack_type, entry_point, port, start_time, details))
+
+print("---- SECURITY ALERT REPORT ----")
+print("Valid rows inserted:", valid_count)
+print("Invalid rows skipped:", invalid_count)
+print()
+
+cursor.execute("""
+SELECT ip, port, service, COUNT(*), MIN(timestamp)
+FROM logs
+WHERE status = 'FAIL'
+GROUP BY ip, port, service
+""")
+
+rows = cursor.fetchall()
+threshold = 3
+
+for row in rows:
+    ip = row[0]
+    port = row[1]
+    service = row[2]
+    count = row[3]
+    start_time = row[4]
+
+    #Skip targets already classified as credential stuffing
+    if (ip, port, service) in credential_stuffing_targets:
+        continue
+
+    if count >= threshold:
+        if str(port) == "22" or service.upper() == "SSH":
+            attack_type = "SSH Brute Force Attack"
+            entry_point = "SSH Authentication Service"
+            details = "Multiple failed SSH login attempts detected"
+
+        elif str(port) == "3389" or service.upper() == "RDP":
+            attack_type = "RDP Brute Force Attack"
+            entry_point = "RDP Authentication Service"
+            details = "Multiple failed RDP login attempts detected"
+
+        else:
+            attack_type = "Suspicious Authentication Activity"
+            entry_point = f"{service} Service"
+            details = "Multiple failed authentication attempts detected"
+
         print("IP:", ip)
         print("Attack Type:", attack_type)
         print("Entry Point:", entry_point)
@@ -103,6 +148,21 @@ for row in rows:
         print("Start Time:", start_time)
         print("Details:", details)
         print()
+
+print("---- POSSIBLE CREDENTIAL STUFFING REPORT ----")
+print()
+
+for result in stuffing_results:
+    ip, attack_type, entry_point, port, start_time, details = result
+
+    print("IP:", ip)
+    print("Attack Type:", attack_type)
+    print("Entry Point:", entry_point)
+    print("Port:", port)
+    print("Start Time:", start_time)
+    print("Details:", details)
+    print()
+
 
 #Close database connection
 conn.close()
