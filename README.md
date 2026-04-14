@@ -37,7 +37,9 @@ Example:
 
 EXAMPLE OUTPUT
 
----- Security Alert Report ----
+---- SECURITY ALERT REPORT ----
+Valid rows inserted: 22
+Invalid rows skipped: 2
 
 IP: 192.168.1.1
 Attack Type: SSH Brute Force Attack
@@ -52,6 +54,15 @@ Entry Point: RDP Authentication Service
 Port: 3389
 Start Time: 2026-04-13T10:06:00
 Details: Multiple failed RDP login attempts detected
+
+---- POSSIBLE CREDENTIAL STUFFING REPORT ----
+
+IP: 192.168.1.11
+Attack Type: Possible Credential Stuffing
+Entry Point: SSH Authentication Service
+Port: 22
+Start Time: 2026-04-13T10:20:00
+Details: Multiple failed login attempts followed by a successful SSH login from the same source IP
 
 --------------------------------------------------
 
