@@ -13,12 +13,13 @@ FEATURES
 - Detects:
   - SSH brute force attacks (port 22)
   - RDP brute force attacks (port 3389)
+  - Possible credential stuffing
 - Displays:
   - Attack type
   - Entry point (service)
   - Port
   - Attack start time
-
+- Detects possible credential stuffing based on     repeated failed attempts followed by a successful  login
 --------------------------------------------------
 
 LOG FORMAT
